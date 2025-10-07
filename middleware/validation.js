@@ -1,6 +1,3 @@
-/**
- * Validates user signup input
- */
 const validateSignup = (req, res, next) => {
     const { name, email, password } = req.body;
     const errors = {};
@@ -41,9 +38,6 @@ const validateSignup = (req, res, next) => {
     next();
 };
 
-/**
- * Validates user login input
- */
 const validateLogin = (req, res, next) => {
     const { email, password } = req.body;
     const errors = {};
@@ -70,7 +64,85 @@ const validateLogin = (req, res, next) => {
     next();
 };
 
+const validateTaskCreate = (req, res, next) => {
+    const { title, description, deadline, status } = req.body;
+    const errors = {};
+
+    if (!title || String(title).trim().length === 0) {
+        errors.title = 'Task title is required';
+    }
+
+    if (!description || String(description).trim().length === 0) {
+        errors.description = 'Task description is required';
+    }
+
+    if (!deadline) {
+        errors.deadline = 'Task deadline is required';
+    } else {
+        const d = new Date(deadline);
+        if (isNaN(d.getTime())) {
+            errors.deadline = 'Deadline must be a valid date';
+        }
+    }
+
+    if (status !== undefined) {
+        const allowed = ['Completed', 'Incomplete'];
+        if (!allowed.includes(status)) {
+            errors.status = "Status must be either 'Completed' or 'Incomplete'";
+        }
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Validation error',
+            errors
+        });
+    }
+
+    next();
+};
+
+const validateTaskUpdate = (req, res, next) => {
+    const { title, description, deadline, status } = req.body;
+    const errors = {};
+
+    if (title !== undefined && String(title).trim().length === 0) {
+        errors.title = 'Task title cannot be empty';
+    }
+
+    if (description !== undefined && String(description).trim().length === 0) {
+        errors.description = 'Task description cannot be empty';
+    }
+
+    if (deadline !== undefined) {
+        const d = new Date(deadline);
+        if (isNaN(d.getTime())) {
+            errors.deadline = 'Deadline must be a valid date';
+        }
+    }
+
+    if (status !== undefined) {
+        const allowed = ['Completed', 'Incomplete'];
+        if (!allowed.includes(status)) {
+            errors.status = "Status must be either 'Completed' or 'Incomplete'";
+        }
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Validation error',
+            errors
+        });
+    }
+
+    next();
+};
+
 module.exports = {
     validateSignup,
-    validateLogin
+    validateLogin,
+    validateTaskCreate,
+    validateTaskUpdate,
 };
